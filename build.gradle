@@ -12,12 +12,16 @@ def protoUrlPostfix = '-windows-x86_64.exe'
 def protoUrl = protoUrlPrefix + protoVersion + '/protoc-' + protoVersion + protoUrlPostfix
 println(protoUrl)
 
-def apikey = new File('apikey').text
+def apiFile = new File('apikey')
+def apikey = ''
+if (apiFile.exists()) {
+    apikey = apiFile.text
+}
 
 
-def f = new File("resources/protoc.exe")
-if (!f.exists()) {
-    new URL(protoUrl).withInputStream{ i -> f.withOutputStream{ it << i }}
+def protocFile = new File("resources/protoc.exe")
+if (!protocFile.exists()) {
+    new URL(protoUrl).withInputStream{ i -> protocFile.withOutputStream{ it << i }}
 }
 
 
@@ -52,7 +56,7 @@ protobuf {
     // so that the build will fail if this specific
     // version of the compiler is not present.
     version = '3.5.0'
-    compiler = f
+    compiler = protocFile
     src = 'src/main/proto'
     autoDependency = true
     outputToProjectDir = true
