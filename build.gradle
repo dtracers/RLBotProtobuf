@@ -53,9 +53,9 @@ protobuf {
     src = 'src/main/proto'
     autoDependency = true
     outputToProjectDir = true
-    outputCpp = 'src/main/cpp'
-    outputJava = 'src/main/java'
-    outputPython = 'src/main/python'
+    outputCpp = 'generated/proto/cpp'
+    outputJava = 'generated/proto/java'
+    outputPython = 'generated/proto/python'
 }
 
 buildscript {
@@ -82,7 +82,7 @@ bintray {
         }
     }
     filesSpec {
-        from 'build/libs'
-        into 'standalone_files/level1'
+        from 'generated/proto'
+        into 'generated/proto'
     }
 }
