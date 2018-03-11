@@ -12,6 +12,9 @@ def protoUrlPostfix = '-windows-x86_64.exe'
 def protoUrl = protoUrlPrefix + protoVersion + '/protoc-' + protoVersion + protoUrlPostfix
 println(protoUrl)
 
+def apikey = new File('apikey').text
+
+
 def f = new File("resources/protoc.exe")
 if (!f.exists()) {
     new URL(protoUrl).withInputStream{ i -> f.withOutputStream{ it << i }}
@@ -68,11 +71,11 @@ buildscript {
 }
 
 bintray {
-    user = 'rlbotofficial '
-    key = '8fa1012530b9d591fe251278e7ee9ff4b614e8fe'
+    user = 'rlbotofficial'
+    key = apikey
     pkg {
         repo = 'RLBotProto'
-        name = 'RLBotProto'
+        name = 'generatedFiles'
         licenses = ['MIT']
         vcsUrl = 'https://github.com/RLBot/RLBotProtobuf.git'
         version {
@@ -83,6 +86,6 @@ bintray {
     }
     filesSpec {
         from 'generated/proto'
-        into 'generated/proto'
+        into 'generated'
     }
 }
