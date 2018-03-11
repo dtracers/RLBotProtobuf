@@ -2,30 +2,21 @@ group 'RLBot'
 version '1.0-SNAPSHOT'
 
 
-apply plugin: "java"
 apply plugin: 'protobuf'
+apply plugin: "java"
 apply plugin: 'com.jfrog.bintray'
 
+def protoVersion = '3.5.0'
+def protoUrlPrefix = 'https://repo1.maven.org/maven2/com/google/protobuf/protoc/'
+def protoUrlPostfix = '-windows-x86_64.exe'
+def protoUrl = protoUrlPrefix + protoVersion + '/protoc-' + protoVersion + protoUrlPostfix
+println(protoUrl)
 
 def f = new File("resources/protoc.exe")
 if (!f.exists()) {
-    new URL('https://repo1.maven.org/maven2/com/google/protobuf/protoc/2.5.0/protoc-2.5.0-windows-x86_64.exe').withInputStream{ i -> f.withOutputStream{ it << i }}
+    new URL(protoUrl).withInputStream{ i -> f.withOutputStream{ it << i }}
 }
 
-configurations {
-    protoc
-}
-
-dependencies {
-    protoc 'com.google.protobuf:protoc:2.5.0'
-}
-
-task copyProtoc(type: Copy) {
-    from configurations.protoc
-    into "$buildDir"
-}
-
-build.dependsOn copyProtoc
 
 repositories {
     mavenLocal()
@@ -57,8 +48,14 @@ protobuf {
     // Explicitly setting protocol buffers version
     // so that the build will fail if this specific
     // version of the compiler is not present.
-    version = '2.5.0'
+    version = '3.5.0'
     compiler = f
+    src = 'src/main/proto'
+    autoDependency = true
+    outputToProjectDir = true
+    outputCpp = 'src/main/cpp'
+    outputJava = 'src/main/java'
+    outputPython = 'src/main/python'
 }
 
 buildscript {
