@@ -6,6 +6,12 @@ apply plugin: "java"
 apply plugin: 'protobuf'
 apply plugin: 'com.jfrog.bintray'
 
+
+def f = new File("resources/protoc.exe")
+if (!f.exists()) {
+    new URL('https://repo1.maven.org/maven2/com/google/protobuf/protoc/2.5.0/protoc-2.5.0-windows-x86_64.exe').withInputStream{ i -> f.withOutputStream{ it << i }}
+}
+
 configurations {
     protoc
 }
@@ -52,6 +58,7 @@ protobuf {
     // so that the build will fail if this specific
     // version of the compiler is not present.
     version = '2.5.0'
+    compiler = f
 }
 
 buildscript {
