@@ -1,3 +1,84 @@
 group 'RLBot'
 version '1.0-SNAPSHOT'
 
+
+apply plugin: "java"
+apply plugin: 'protobuf'
+apply plugin: 'com.jfrog.bintray'
+
+configurations {
+    protoc
+}
+
+dependencies {
+    protoc 'com.google.protobuf:protoc:2.5.0'
+}
+
+task copyProtoc(type: Copy) {
+    from configurations.protoc
+    into "$buildDir"
+}
+
+build.dependsOn copyProtoc
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.andrewkroh.gradle:gradle-protobuf-plugin:0.5.0'
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
+    }
+}
+
+
+protobuf {
+    // Explicitly setting protocol buffers version
+    // so that the build will fail if this specific
+    // version of the compiler is not present.
+    version = '2.5.0'
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
+bintray {
+    user = 'rlbotofficial '
+    key = '8fa1012530b9d591fe251278e7ee9ff4b614e8fe'
+    pkg {
+        repo = 'RLBotProto'
+        name = 'RLBotProto'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/RLBot/RLBotProtobuf.git'
+        version {
+            name = '0.0.1-Initial'
+            released = new Date()
+            vcsTag = '0.0.1'
+        }
+    }
+    filesSpec {
+        from 'build/libs'
+        into 'standalone_files/level1'
+    }
+}
