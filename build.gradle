@@ -117,6 +117,7 @@ if (upload_type == 'java') {
 
 if (upload_type == 'nuget') {
     bintray.pkg.repo = 'RLBotProtoNuget'
+    // TODO(tareheart): nuget packaging
     // nuget stuff here
     // https://github.com/Ullink/gradle-nuget-plugin
 }
