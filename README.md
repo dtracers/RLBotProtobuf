@@ -4,7 +4,7 @@ Protobuf definitions and generated classes for RLBot
 
 To generate files run
 
-`gradle compileProto`
+`gradle build`
 
 
 to upload run

@@ -1,16 +1,11 @@
 group 'RLBot'
 version '1.0-SNAPSHOT'
 
-
-apply plugin: 'protobuf'
-apply plugin: "java"
+apply plugin: 'java'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.google.protobuf'
 
-def protoVersion = '3.5.0'
-def protoUrlPrefix = 'https://repo1.maven.org/maven2/com/google/protobuf/protoc/'
-def protoUrlPostfix = '-windows-x86_64.exe'
-def protoUrl = protoUrlPrefix + protoVersion + '/protoc-' + protoVersion + protoUrlPostfix
-println(protoUrl)
+def protoVersion = '3.1.0'
 
 def apiFile = new File('apikey')
 def apikey = ''
@@ -18,60 +13,46 @@ if (apiFile.exists()) {
     apikey = apiFile.text
 }
 
-
-def protocFile = new File("resources/protoc.exe")
-if (!protocFile.exists()) {
-    new URL(protoUrl).withInputStream{ i -> protocFile.withOutputStream{ it << i }}
-}
-
-
 repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.google.protobuf:protobuf-java:' + protoVersion
 }
 
 buildscript {
     repositories {
         mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.andrewkroh.gradle:gradle-protobuf-plugin:0.5.0'
-    }
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
-    }
-}
-
-
-protobuf {
-    // Explicitly setting protocol buffers version
-    // so that the build will fail if this specific
-    // version of the compiler is not present.
-    version = '3.5.0'
-    compiler = protocFile
-    src = 'src/main/proto'
-    autoDependency = true
-    outputToProjectDir = true
-    outputCpp = 'generated/proto/cpp'
-    outputJava = 'generated/proto/java'
-    outputPython = 'generated/proto/python'
-}
-
-buildscript {
-    repositories {
         jcenter()
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
     }
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:' + protoVersion
+    }
+    generateProtoTasks {
+        // all() returns the collection of all protoc tasks
+        all().each {
+            task ->
+                task.builtins {
+                    python { }
+                    cpp {}
+                    java {}
+                }
+        }
+    }
+    generatedFilesBaseDir = '$projectDir/generated/'
 }
 
 bintray {
@@ -89,7 +70,8 @@ bintray {
         }
     }
     filesSpec {
-        from 'generated/proto'
+        from 'src/main'
+        from 'generated/main'
         into 'generated'
     }
 }
