@@ -1,17 +1,22 @@
 group 'RLBot'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 apply plugin: 'java'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.google.protobuf'
 
 def protoVersion = '3.1.0'
+def upload_type = 'java'
+def repoVersion = version
+
 
 def apiFile = new File('apikey')
 def apikey = ''
 if (apiFile.exists()) {
     apikey = apiFile.text
 }
+
+
 
 repositories {
     mavenLocal()
@@ -32,6 +37,7 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
+        classpath "com.ullink.gradle:gradle-nuget-plugin:2.15"
     }
 }
 
@@ -58,20 +64,59 @@ protobuf {
 bintray {
     user = 'rlbotofficial'
     key = apikey
+    publish = true
     pkg {
-        repo = 'RLBotProto'
         name = 'generatedFiles'
         licenses = ['MIT']
         vcsUrl = 'https://github.com/RLBot/RLBotProtobuf.git'
         version {
-            name = '0.0.1-Initial'
+            name = repoVersion
             released = new Date()
-            vcsTag = '0.0.1'
+            vcsTag = repoVersion
         }
     }
-    filesSpec {
+}
+
+
+if (upload_type == 'python') {
+    bintray.pkg.repo = 'RLBotProto'
+    bintray.filesSpec {
         from 'src/main'
         from 'generated/main'
         into 'generated'
     }
+}
+
+task zipFolder(type: Zip) {
+    from 'generated/main'
+    from 'src/main'
+    into 'generated'
+    archiveName 'result.zip'
+}
+
+
+if (upload_type == 'java') {
+    apply plugin: "maven-publish"
+    publishing {
+        publications {
+            MyPublication(MavenPublication) {
+                groupId 'RLBot'
+                artifactId 'Framework.proto'
+                version = repoVersion
+                artifact(zipFolder) {
+                    classifier "src"
+                    extension "zip"
+                }
+            }
+        }
+    }
+    bintray.publications = ['MyPublication']
+    bintray.pkg.repo = 'RLBotProtoMaven'
+}
+
+
+if (upload_type == 'nuget') {
+    bintray.pkg.repo = 'RLBotProtoNuget'
+    // nuget stuff here
+    // https://github.com/Ullink/gradle-nuget-plugin
 }
