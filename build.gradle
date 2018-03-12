@@ -1,0 +1,77 @@
+group 'RLBot'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.google.protobuf'
+
+def protoVersion = '3.1.0'
+
+def apiFile = new File('apikey')
+def apikey = ''
+if (apiFile.exists()) {
+    apikey = apiFile.text
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.google.protobuf:protobuf-java:' + protoVersion
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
+    }
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:' + protoVersion
+    }
+    generateProtoTasks {
+        // all() returns the collection of all protoc tasks
+        all().each {
+            task ->
+                task.builtins {
+                    python { }
+                    cpp {}
+                    java {}
+                }
+        }
+    }
+    generatedFilesBaseDir = '$projectDir/generated/'
+}
+
+bintray {
+    user = 'rlbotofficial'
+    key = apikey
+    pkg {
+        repo = 'RLBotProto'
+        name = 'generatedFiles'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/RLBot/RLBotProtobuf.git'
+        version {
+            name = '0.0.1-Initial'
+            released = new Date()
+            vcsTag = '0.0.1'
+        }
+    }
+    filesSpec {
+        from 'src/main'
+        from 'generated/main'
+        into 'generated'
+    }
+}
